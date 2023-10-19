@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cambio De Divisas</title>
+</head>
+<body>
+    <h1>Conversión de moneda</h1>
+    <form>
+        <label>Conversión</label><br/>
+        <select id="selectFrom"></select>
+        <input type="number" id="inpImporte" placeholder="Importe">
+        a
+        <select id="selectTo"></select>
+        <input type="number" id="inpResult" placeholder="Resultado" disabled>
+        <button type="button" onclick="convertir()">Convertir</button>
+    </form>
+    <script>
+        const host = 'api.frankfurter.app';
+        
+        async function cargarMonedas() {
+            const resp = await fetch(`https://${host}/currencies`);
+            const data = await resp.json();
+            const selectFrom = document.querySelector("#selectFrom");
+            const selectTo = document.querySelector("#selectTo");
+
+            Object.entries(data).forEach(([key, value]) => {
+                const option = new Option(`${value} - [${key}]`, key);
+                selectFrom.add(option);
+                selectTo.add(option.cloneNode(true));
+            });
+        }
+
+        async function convertir() {
+            const importe = parseFloat(document.querySelector("#inpImporte").value);
+            const fromCurrency = document.querySelector("#selectFrom").value;
+            const toCurrency = document.querySelector("#selectTo").value;
+            const inpResultado = document.querySelector("#inpResult");
+
+            if (!isNaN(importe)) {
+                const resp = await fetch(`https://${host}/latest?amount=${importe}&from=${fromCurrency}&to=${toCurrency}`);
+                const data = await resp.json();
+                inpResultado.value = data.rates[toCurrency];
+            } else {
+                inpResultado.value = "";
+            }
+        }
+        cargarMonedas();
+    </script>
+</body>
+</html>
